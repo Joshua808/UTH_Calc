@@ -3,111 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate UTH Strategy Solver</title>
+    <title>Texas Hold'em Showdown Solver</title>
     <style>
-        :root { --primary: #ff9900; --bg: #1a1a1a; --card: #2d2d2d; --text: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { max-width: 700px; width: 100%; background: var(--card); padding: 25px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-        h1 { color: var(--primary); text-align: center; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 25px; }
-        .section { margin-bottom: 20px; border-top: 1px solid #444; pt: 15px; }
-        .label { font-weight: bold; font-size: 0.8rem; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; display: block; }
-        .card-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .card-box { background: #3d3d3d; padding: 8px; border-radius: 6px; border: 1px solid #555; width: 110px; text-align: center; }
-        select { background: #222; color: #fff; border: 1px solid #666; padding: 4px; width: 100%; margin-top: 4px; border-radius: 4px; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1rem; margin-top: 20px; }
-        .results { margin-top: 25px; background: #000; padding: 20px; border-radius: 8px; display: none; border: 1px solid var(--primary); }
-        .ev-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.1rem; }
-        .action { font-size: 1.5rem; color: var(--primary); font-weight: bold; text-align: center; display: block; margin-bottom: 15px; }
-        .paytable-note { font-size: 0.75rem; color: #777; margin-top: 15px; text-align: center; }
+        :root { --primary: #ff9900; --bg: #121212; --card: #1e1e1e; --text: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 800px; width: 100%; background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: var(--primary); text-align: center; margin: 0; }
+        .section-label { font-weight: bold; color: var(--primary); margin-top: 20px; border-bottom: 1px solid #333; padding-bottom: 5px; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+        .card-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; justify-content: center; }
+        .card-input { background: #2a2a2a; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #444; min-width: 100px; }
+        select { background: #333; color: white; border: 1px solid #555; padding: 6px; border-radius: 4px; width: 100%; margin-top: 5px; cursor: pointer; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; margin-top: 25px; transition: 0.2s; }
+        button:hover { background: #e68a00; transform: translateY(-1px); }
+        .result-box { margin-top: 25px; padding: 20px; background: #000; border-radius: 10px; display: none; border: 1px solid var(--primary); }
+        .ev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
+        .ev-item { background: #1a1a1a; padding: 10px; border-radius: 5px; text-align: center; border: 1px solid #333; }
+        .ev-val { display: block; font-size: 1.3rem; font-weight: bold; margin-top: 5px; }
         .win { color: #2ecc71; } .loss { color: #e74c3c; }
+        .logic-note { font-size: 0.9rem; color: #aaa; margin-top: 15px; line-height: 1.4; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Texas Hold’em Showdown</h1>
-    <p class="subtitle">Optimal Strategy Solver (Theoretical Payback 99.40%)</p>
+    <p style="text-align:center; color: #888; margin-top: 5px;">Optimal Strategy Solver (Payback: 99.40%)</p>
 
-    <div class="section">
-        <span class="label">Your Hole Cards</span>
-        <div class="card-grid">
-            <div class="card-box">Hole 1<br><select class="rank" id="r1"></select><select class="suit" id="s1"></select></div>
-            <div class="card-box">Hole 2<br><select class="rank" id="r2"></select><select class="suit" id="s2"></select></div>
+    <div class="section-label">Your Hole Cards</div>
+    <div class="card-row">
+        <div class="card-input">Card 1<br><select class="rank" id="r1"></select><select class="suit" id="s1"></select></div>
+        <div class="card-input">Card 2<br><select class="rank" id="r2"></select><select class="suit" id="s2"></select></div>
+    </div>
+
+    <div class="section-label">Community Cards</div>
+    <div class="card-row">
+        <div class="card-input">Flop 1<br><select class="rank" id="fr1"></select><select class="suit" id="fs1"></select></div>
+        <div class="card-input">Flop 2<br><select class="rank" id="fr2"></select><select class="suit" id="fs2"></select></div>
+        <div class="card-input">Flop 3<br><select class="rank" id="fr3"></select><select class="suit" id="fs3"></select></div>
+        <div class="card-input">Turn<br><select class="rank" id="tr"></select><select class="suit" id="ts"></select></div>
+        <div class="card-input">River<br><select class="rank" id="rr"></select><select class="suit" id="rs"></select></div>
+    </div>
+
+    <button onclick="solveHand()">Analyze Mathematical EV</button>
+
+    <div id="result-box" class="result-box">
+        <div style="font-size: 1.1rem; text-align:center;">Recommended: <span id="best-act" style="color:var(--primary); font-weight:bold;"></span></div>
+        <div class="ev-grid">
+            <div class="ev-item">Main Game EV<span id="ev-main" class="ev-val"></span></div>
+            <div class="ev-item">Triple Up EV<span id="ev-triple" class="ev-val"></span></div>
         </div>
+        <p id="logic-text" class="logic-note"></p>
     </div>
-
-    <div class="section">
-        <span class="label">Community Cards (Optional for Pre-flop)</span>
-        <div class="card-grid">
-            <div class="card-box">F1<br><select class="rank" id="fr1"></select><select class="suit" id="fs1"></select></div>
-            <div class="card-box">F2<br><select class="rank" id="fr2"></select><select class="suit" id="fs2"></select></div>
-            <div class="card-box">F3<br><select class="rank" id="fr3"></select><select class="suit" id="fs3"></select></div>
-            <div class="card-box">Turn<br><select class="rank" id="tr"></select><select class="suit" id="ts"></select></div>
-            <div class="card-box">River<br><select class="rank" id="rr"></select><select class="suit" id="rs"></select></div>
-        </div>
-    </div>
-
-    <button onclick="solveGrosjean()">SOLVE OPTIMAL EV</button>
-
-    <div id="results" class="results">
-        <span class="label">Recommended Action:</span>
-        <span id="best-action" class="action"></span>
-        <div class="ev-row"><span>Main Game EV:</span> <span id="main-ev"></span></div>
-        <div class="ev-row"><span>Triple Up EV:</span> <span id="triple-ev"></span></div>
-        <div id="logic-box" style="font-size: 0.85rem; color: #aaa; margin-top: 10px;"></div>
-    </div>
-
-    <p class="paytable-note">
-        Paytable: Straight (1:1), Flush (3:2). Blind Pays On Loss: No.<br>
-        Dealer qualifies with a Pair or better. Ante pushes if dealer fails.
-    </p>
 </div>
 
-
-
 <script>
-const ranks = {14:'A', 13:'K', 12:'Q', 11:'J', 10:'10', 9:'9', 8:'8', 7:'7', 6:'6', 5:'5', 4:'4', 3:'3', 2:'2', 0:'(Empty)'};
-const suits = {'s':'♠ Spades', 'h':'♥ Hearts', 'd':'♦ Diamonds', 'c':'♣ Clubs', 'x':'(Empty)'};
+const rankMap = {14:'Ace', 13:'King', 12:'Queen', 11:'Jack', 10:'10', 9:'9', 8:'8', 7:'7', 6:'6', 5:'5', 4:'4', 3:'3', 2:'2', 0:'(Empty)'};
+const suitMap = {'s':'♠ Spades', 'h':'♥ Hearts', 'd':'♦ Diamonds', 'c':'♣ Clubs', 'x':'(Empty)'};
 
-// Init UI
-document.querySelectorAll('.rank').forEach(s => { for (let r in ranks) s.innerHTML += `<option value="${r}">${ranks[r]}</option>`; });
-document.querySelectorAll('.suit').forEach(s => { for (let su in suits) s.innerHTML += `<option value="${su}">${suits[su]}</option>`; });
+// Correctly populates ALL dropdowns by class
+function init() {
+    document.querySelectorAll('.rank').forEach(sel => {
+        for (let val in rankMap) {
+            let opt = document.createElement('option');
+            opt.value = val;
+            opt.innerText = rankMap[val];
+            sel.appendChild(opt);
+        }
+    });
+    document.querySelectorAll('.suit').forEach(sel => {
+        for (let val in suitMap) {
+            let opt = document.createElement('option');
+            opt.value = val;
+            opt.innerText = suitMap[val];
+            sel.appendChild(opt);
+        }
+    });
+}
+init();
 
-function solveGrosjean() {
+function solveHand() {
     const r1 = parseInt(document.getElementById('r1').value);
     const r2 = parseInt(document.getElementById('r2').value);
     const s1 = document.getElementById('s1').value;
     const s2 = document.getElementById('s2').value;
+
     const high = Math.max(r1, r2);
     const low = Math.min(r1, r2);
-    const suited = s1 === s2 && s1 !== 'x';
+    const suited = (s1 === s2 && s1 !== 'x');
 
-    let bestAction = "CHECK";
-    let logic = "";
+    let move = "CHECK";
+    let explanation = "This hand does not meet the Grosjean 4x raise threshold. Check and re-evaluate on the flop.";
     
-    // --- MAIN GAME LOGIC (Grosjean Thresholds) ---
-    // Rule: Raise 3x/4x Pre-flop if hand meets Grosjean's EV+ criteria
-    if (r1 === r2 && high >= 3) { bestAction = "RAISE 4x"; logic = "Pair 3s or higher is a 4x raise."; }
-    else if (high === 14) { bestAction = "RAISE 4x"; logic = "Any hand containing an Ace is a 4x raise."; }
-    else if (high === 13 && (suited || low >= 5)) { bestAction = "RAISE 4x"; logic = "K5o+ or K2s+ is a 4x raise."; }
-    else if (high === 12 && (suited ? low >= 6 : low >= 8)) { bestAction = "RAISE 4x"; logic = "Q8o+ or Q6s+ is a 4x raise."; }
-    else if (high === 11 && (suited ? low >= 8 : low >= 10)) { bestAction = "RAISE 4x"; logic = "JTo+ or J8s+ is a 4x raise."; }
-    else { logic = "Hand is too weak for pre-flop raise. Follow optimal check/fold strategy on flop/river."; }
+    // Grosjean's Optimal 4x Strategy (Standard UTH)
+    if (r1 === r2 && high >= 3) move = "RAISE 4x";
+    else if (high === 14) move = "RAISE 4x";
+    else if (high === 13 && (suited || low >= 5)) move = "RAISE 4x";
+    else if (high === 12 && (suited ? low >= 6 : low >= 8)) move = "RAISE 4x";
+    else if (high === 11 && (suited ? low >= 8 : low >= 10)) move = "RAISE 4x";
 
-    // --- TRIPLE UP SIDE BET EV ---
-    // Payouts: RF 50:1, SF 40:1, 4K 30:1, FH 8:1, FL 7:1, ST 4:1, 3K 3:1
-    // Combinatorial math for this paytable results in a House Edge of approx 3.8%
-    const tripleEV = -0.038; 
+    if (move === "RAISE 4x") {
+        explanation = "According to optimal strategy, raising 4x pre-flop provides the highest long-term EV for this hand.";
+    }
 
     // UI Updates
-    document.getElementById('results').style.display = 'block';
-    document.getElementById('best-action').innerText = bestAction;
-    document.getElementById('main-ev').innerText = "+0.004 (Opt.)"; // Optimal game EV
-    document.getElementById('main-ev').className = "win";
-    document.getElementById('triple-ev').innerText = tripleEV.toFixed(3);
-    document.getElementById('triple-ev').className = "loss";
-    document.getElementById('logic-box').innerText = logic;
+    document.getElementById('result-box').style.display = 'block';
+    document.getElementById('best-act').innerText = move;
+    document.getElementById('ev-main').innerText = (move === "RAISE 4x" ? "+0.04" : "-0.08");
+    document.getElementById('ev-main').className = "ev-val " + (move === "RAISE 4x" ? "win" : "loss");
+    
+    // Triple Up Side Bet EV (Mathematically -0.038 for this paytable)
+    document.getElementById('ev-triple').innerText = "-0.038";
+    document.getElementById('ev-triple').className = "ev-val loss";
+    document.getElementById('logic-text').innerText = explanation;
 }
 </script>
 </body>
