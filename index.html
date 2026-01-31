@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UTH Showdown Text-Input Solver</title>
+    <title>UTH Text Solver</title>
     <style>
         :root { --primary: #ff9900; --bg: #121212; --card: #1e1e1e; --text: #ffffff; --border: #333; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 20px; }
@@ -15,13 +15,14 @@
         .section-label { font-weight: bold; color: var(--primary); margin-top: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; text-transform: uppercase; font-size: 0.7rem; }
         .card-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
         .input-box { background: #2a2a2a; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #444; flex: 1; }
-        input { background: #333; color: white; border: 1px solid #555; padding: 8px; border-radius: 4px; width: 60px; text-align: center; font-weight: bold; font-size: 1.1rem; }
-        input:focus { border-color: var(--primary); outline: none; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; margin-top: 20px; }
+        input { background: #333; color: white; border: 1px solid #555; padding: 10px; border-radius: 4px; width: 50px; text-align: center; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; }
+        input:focus { border-color: var(--primary); outline: none; background: #444; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        button { flex: 2; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        .clear-btn { flex: 1; background: #444; color: white; }
         .result-box { margin-top: 20px; padding: 15px; background: #000; border-radius: 10px; display: none; border: 1px solid var(--primary); text-align: center; }
         .ev-val { display: block; font-size: 1.4rem; font-weight: bold; margin-top: 5px; }
         .win { color: #2ecc71; } .loss { color: #e74c3c; }
-        .hint { font-size: 0.7rem; color: #888; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -29,32 +30,35 @@
 <div class="layout">
     <div class="main-calc">
         <h1 style="color:var(--primary); margin:0;">Showdown Solver</h1>
-        <p style="color: #888; font-size: 0.8rem;">Type cards like: <b>As</b>, <b>10h</b>, <b>7d</b>, <b>2c</b></p>
+        <p style="color: #888; font-size: 0.8rem;">Type cards (e.g., <b>AS</b>, <b>10H</b>, <b>7D</b>)</p>
 
-        <div class="section-label">Player Hole Cards</div>
+        <div class="section-label">Your Hole Cards</div>
         <div class="card-row">
-            <div class="input-box">C1<br><input type="text" id="p1" placeholder="As"></div>
-            <div class="input-box">C2<br><input type="text" id="p2" placeholder="Kd"></div>
+            <div class="input-box">C1<br><input type="text" id="p1" maxlength="3"></div>
+            <div class="input-box">C2<br><input type="text" id="p2" maxlength="3"></div>
         </div>
 
         <div class="section-label">Community Board</div>
         <div class="card-row">
-            <div class="input-box">F1<br><input type="text" id="f1" placeholder="Jh"></div>
-            <div class="input-box">F2<br><input type="text" id="f2" placeholder="10h"></div>
-            <div class="input-box">F3<br><input type="text" id="f3" placeholder="2c"></div>
-            <div class="input-box">Turn<br><input type="text" id="t" placeholder="5s"></div>
-            <div class="input-box">River<br><input type="text" id="r" placeholder="Qh"></div>
+            <div class="input-box">F1<br><input type="text" id="f1" maxlength="3"></div>
+            <div class="input-box">F2<br><input type="text" id="f2" maxlength="3"></div>
+            <div class="input-box">F3<br><input type="text" id="f3" maxlength="3"></div>
+            <div class="input-box">Turn<br><input type="text" id="t" maxlength="3"></div>
+            <div class="input-box">River<br><input type="text" id="r" maxlength="3"></div>
         </div>
 
-        <button onclick="solve()">SOLVE EXACT EV</button>
+        <div class="btn-group">
+            <button onclick="solve()">SOLVE EXACT EV</button>
+            <button class="clear-btn" onclick="clearAll()">CLEAR</button>
+        </div>
 
         <div id="result-box" class="result-box">
-            <div style="font-size: 0.9rem;">Calculated Result: <span id="hand-desc" style="color:var(--primary)"></span></div>
+            <div style="font-size: 0.9rem;">Final Hand: <span id="hand-desc" style="color:var(--primary)"></span></div>
             <div style="display:flex; justify-content: space-around; margin-top:15px;">
                 <div>Main Game EV<span id="ev-main" class="ev-val"></span></div>
                 <div>Triple Up EV<span id="ev-triple" class="ev-val"></span></div>
             </div>
-            <div class="hint" id="win-rate"></div>
+            <div id="win-rate" style="font-size: 0.75rem; color: #888; margin-top: 10px;"></div>
         </div>
     </div>
 
@@ -86,14 +90,19 @@ const rankValues = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':
 const blindPT = {10:500, 9:50, 8:10, 7:3, 6:1.5, 5:1};
 const triplePT = {10:50, 9:40, 8:30, 7:8, 6:7, 5:4, 4:3};
 
-function parseCard(str) {
-    if (!str) return null;
-    str = str.trim().toUpperCase();
-    let suit = str.slice(-1).toLowerCase();
-    let rankStr = str.slice(0, -1);
-    let rank = rankValues[rankStr] || parseInt(rankStr);
-    if (!rank || !['s','h','d','c'].includes(suit)) return null;
-    return { r: rank, s: suit };
+function parseCard(val) {
+    if (!val) return null;
+    val = val.trim().toUpperCase();
+    let s = val.slice(-1).toLowerCase();
+    let rStr = val.slice(0, -1);
+    let r = rankValues[rStr] || parseInt(rStr);
+    if (!r || !['s','h','d','c'].includes(s)) return null;
+    return { r, s };
+}
+
+function clearAll() {
+    document.querySelectorAll('input').forEach(i => i.value = '');
+    document.getElementById('result-box').style.display = 'none';
 }
 
 function evaluate(cards) {
@@ -121,9 +130,9 @@ function evaluate(cards) {
 }
 
 function solve() {
-    const ids = ['p1','p2','f1','f2','f3','t','r'];
-    const cards = ids.map(id => parseCard(document.getElementById(id).value)).filter(c => c !== null);
-    if (cards.length < 7) { alert("Please enter all 7 cards (Hole + Board)"); return; }
+    const inputs = ['p1','p2','f1','f2','f3','t','r'];
+    const cards = inputs.map(id => parseCard(document.getElementById(id).value)).filter(c => c !== null);
+    if (cards.length < 7) { alert("Please enter all 7 cards (e.g. As, 10h, 2d)"); return; }
 
     const playerHole = [cards[0], cards[1]];
     const board = [cards[2], cards[3], cards[4], cards[5], cards[6]];
@@ -142,16 +151,16 @@ function solve() {
             let handEV = 0;
             if(pRes.score > dRes.score) {
                 wins++;
-                handEV += 1 + (dQual ? 1 : 0) + (blindPT[pRes.score] || 0); //
+                handEV += 1 + (dQual ? 1 : 0) + (blindPT[pRes.score] || 0); // Win settles Play, Ante (if qualified), and Blind
             } else if(pRes.score < dRes.score) {
-                handEV -= 1 + 1 + (dQual ? 1 : 0); // Loss settles play, blind, and ante (if qual)
+                handEV -= 1 + 1 + (dQual ? 1 : 0); // Loss settles Play, Blind, and Ante (if qualified)
             }
             totalEV += handEV;
         }
     }
 
     const mainEV = totalEV / count;
-    const tripleEV = triplePT[pRes.score] || -1; //
+    const tripleEV = triplePT[pRes.score] || -1; // Triple Up settles independently
 
     document.getElementById('result-box').style.display = 'block';
     document.getElementById('hand-desc').innerText = pRes.name;
@@ -159,7 +168,7 @@ function solve() {
     document.getElementById('ev-main').className = "ev-val " + (mainEV >= 0 ? "win" : "loss");
     document.getElementById('ev-triple').innerText = (tripleEV >= 0 ? "+" + tripleEV : "-1");
     document.getElementById('ev-triple').className = "ev-val " + (tripleEV >= 0 ? "win" : "loss");
-    document.getElementById('win-rate').innerText = "Win Prob vs Hidden Dealer: " + ((wins/count)*100).toFixed(1) + "%";
+    document.getElementById('win-rate').innerText = "Win Probability vs Hidden Dealer: " + ((wins/count)*100).toFixed(1) + "%";
 }
 </script>
 </body>
