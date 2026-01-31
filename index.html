@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Texas Hold'em EV Solver</title>
+    <style>
+        :root { --primary: #27ae60; --bg: #121212; --card: #1e1e1e; --gold: #f1c40f; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 500px; width: 100%; background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        select, button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 1rem; }
+        select { background: #333; color: white; }
+        button { background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #2ecc71; transform: translateY(-2px); }
+        .result-box { margin-top: 25px; padding: 15px; border-radius: 10px; background: #252525; display: none; }
+        .ev-display { display: flex; justify-content: space-around; margin-top: 15px; }
+        .ev-item { text-align: center; }
+        .ev-value { display: block; font-size: 1.4rem; font-weight: bold; margin-top: 5px; }
+        .win { color: #2ecc71; }
+        .loss { color: #e74c3c; }
+        .highlight { border: 2px solid var(--gold); padding: 10px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="color:var(--primary); text-align:center;">UTH EV Solver</h2>
+    
+    <div class="grid">
+        <div>
+            <label>Card 1</label>
+            <select id="r1">
+                <option value="14">Ace</option><option value="13">King</option><option value="12">Queen</option>
+                <option value="11">Jack</option><option value="10">10</option><option value="9">9</option>
+                <option value="8">8</option><option value="7">7</option><option value="6">6</option>
+                <option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option>
+            </select>
+        </div>
+        <div>
+            <label>Card 2</label>
+            <select id="r2">
+                <option value="14">Ace</option><option value="13">King</option><option value="12">Queen</option>
+                <option value="11">Jack</option><option value="10">10</option><option value="9">9</option>
+                <option value="8">8</option><option value="7">7</option><option value="6">6</option>
+                <option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option>
+            </select>
+        </div>
+    </div>
+
+    <div style="text-align:center; margin-bottom:15px;">
+        <input type="checkbox" id="suited"> <label for="suited">Suited Hand</label>
+    </div>
+
+    <button onclick="solveEV()">Calculate EV</button>
+
+    <div id="result-box" class="result-box">
+        <div style="text-align:center; font-weight:bold; margin-bottom:10px;">Optimal Action: <span id="best-action" style="color:var(--gold)"></span></div>
+        <div class="ev-display">
+            <div id="raise-box" class="ev-item">
+                <span style="font-size:0.8rem">RAISE 4x EV</span>
+                <span id="ev-raise" class="ev-value"></span>
+            </div>
+            <div id="check-box" class="ev-item">
+                <span style="font-size:0.8rem">CHECK EV</span>
+                <span id="ev-check" class="ev-value"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function solveEV() {
+    const r1 = parseInt(document.getElementById('r1').value);
+    const r2 = parseInt(document.getElementById('r2').value);
+    const suited = document.getElementById('suited').checked;
+    const high = Math.max(r1, r2);
+    const low = Math.min(r1, r2);
+
+    // Simplified EV
