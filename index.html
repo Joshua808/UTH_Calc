@@ -3,31 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Texas Hold'em Showdown Brute-Force Solver</title>
+    <title>UTH Showdown Text-Input Solver</title>
     <style>
         :root { --primary: #ff9900; --bg: #121212; --card: #1e1e1e; --text: #ffffff; --border: #333; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 20px; }
-        .layout { display: flex; max-width: 1100px; width: 100%; gap: 20px; }
-        
-        /* Main Calculator Area */
+        .layout { display: flex; max-width: 1000px; width: 100%; gap: 20px; }
         .main-calc { flex: 2; background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        /* Sidebar Area */
-        .sidebar { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 280px; }
-        .paytable-card { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.85rem; }
-        .paytable-card h3 { color: var(--primary); margin-top: 0; font-size: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
-        .pt-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #222; }
-        
-        /* Card Inputs */
-        .section-label { font-weight: bold; color: var(--primary); margin-top: 20px; border-bottom: 1px solid #333; padding-bottom: 5px; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
-        .card-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; }
-        .card-input { background: #2a2a2a; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #444; flex: 1; min-width: 90px; }
-        select { background: #333; color: white; border: 1px solid #555; padding: 6px; border-radius: 4px; width: 100%; margin-top: 5px; cursor: pointer; font-size: 0.9rem; }
-        
+        .sidebar { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 260px; }
+        .paytable-card { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.8rem; }
+        .pt-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #222; }
+        .section-label { font-weight: bold; color: var(--primary); margin-top: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; text-transform: uppercase; font-size: 0.7rem; }
+        .card-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+        .input-box { background: #2a2a2a; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #444; flex: 1; }
+        input { background: #333; color: white; border: 1px solid #555; padding: 8px; border-radius: 4px; width: 60px; text-align: center; font-weight: bold; font-size: 1.1rem; }
+        input:focus { border-color: var(--primary); outline: none; }
         button { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; margin-top: 20px; }
-        .result-box { margin-top: 25px; padding: 20px; background: #000; border-radius: 10px; display: none; border: 1px solid var(--primary); text-align: center; }
-        .ev-val { display: block; font-size: 1.5rem; font-weight: bold; margin-top: 5px; }
+        .result-box { margin-top: 20px; padding: 15px; background: #000; border-radius: 10px; display: none; border: 1px solid var(--primary); text-align: center; }
+        .ev-val { display: block; font-size: 1.4rem; font-weight: bold; margin-top: 5px; }
         .win { color: #2ecc71; } .loss { color: #e74c3c; }
+        .hint { font-size: 0.7rem; color: #888; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -35,84 +29,72 @@
 <div class="layout">
     <div class="main-calc">
         <h1 style="color:var(--primary); margin:0;">Showdown Solver</h1>
-        <p style="color: #888; font-size: 0.9rem;">Brute-Force Calculation (990 Dealer Combinations)</p>
+        <p style="color: #888; font-size: 0.8rem;">Type cards like: <b>As</b>, <b>10h</b>, <b>7d</b>, <b>2c</b></p>
 
-        <div class="section-label">Your Hole Cards</div>
+        <div class="section-label">Player Hole Cards</div>
         <div class="card-row">
-            <div class="card-input">Card 1<br><select class="rank" id="r1"></select><select class="suit" id="s1"></select></div>
-            <div class="card-input">Card 2<br><select class="rank" id="r2"></select><select class="suit" id="s2"></select></div>
+            <div class="input-box">C1<br><input type="text" id="p1" placeholder="As"></div>
+            <div class="input-box">C2<br><input type="text" id="p2" placeholder="Kd"></div>
         </div>
 
         <div class="section-label">Community Board</div>
         <div class="card-row">
-            <div class="card-input">F1<br><select class="rank" id="fr1"></select><select class="suit" id="fs1"></select></div>
-            <div class="card-input">F2<br><select class="rank" id="fr2"></select><select class="suit" id="fs2"></select></div>
-            <div class="card-input">F3<br><select class="rank" id="fr3"></select><select class="suit" id="fs3"></select></div>
-        </div>
-        <div class="card-row">
-            <div class="card-input">Turn<br><select class="rank" id="tr"></select><select class="suit" id="ts"></select></div>
-            <div class="card-input">River<br><select class="rank" id="rr"></select><select class="suit" id="rs"></select></div>
+            <div class="input-box">F1<br><input type="text" id="f1" placeholder="Jh"></div>
+            <div class="input-box">F2<br><input type="text" id="f2" placeholder="10h"></div>
+            <div class="input-box">F3<br><input type="text" id="f3" placeholder="2c"></div>
+            <div class="input-box">Turn<br><input type="text" id="t" placeholder="5s"></div>
+            <div class="input-box">River<br><input type="text" id="r" placeholder="Qh"></div>
         </div>
 
-        <button onclick="solve()">CALCULATE BRUTE-FORCE EV</button>
+        <button onclick="solve()">SOLVE EXACT EV</button>
 
         <div id="result-box" class="result-box">
-            <div style="font-size: 1rem;">Optimal Action: <span id="best-act" style="color:var(--primary); font-weight:bold;"></span></div>
+            <div style="font-size: 0.9rem;">Calculated Result: <span id="hand-desc" style="color:var(--primary)"></span></div>
             <div style="display:flex; justify-content: space-around; margin-top:15px;">
                 <div>Main Game EV<span id="ev-main" class="ev-val"></span></div>
                 <div>Triple Up EV<span id="ev-triple" class="ev-val"></span></div>
             </div>
-            <div id="hand-name" style="margin-top:10px; font-size:0.8rem; color:#888;"></div>
+            <div class="hint" id="win-rate"></div>
         </div>
     </div>
 
     <div class="sidebar">
         <div class="paytable-card">
-            <h3>Blind Pay Table</h3>
-            <div class="pt-row"><span>Royal Flush</span> <span>500 to 1</span></div>
-            <div class="pt-row"><span>Straight Flush</span> <span>50 to 1</span></div>
-            <div class="pt-row"><span>Four-of-a-Kind</span> <span>10 to 1</span></div>
-            <div class="pt-row"><span>Full House</span> <span>3 to 1</span></div>
-            <div class="pt-row"><span>Flush</span> <span>3 to 2</span></div>
-            <div class="pt-row"><span>Straight</span> <span>1 to 1</span></div>
+            <h3 style="color:var(--primary); margin:0 0 10px 0;">Blind Payouts</h3>
+            <div class="pt-row"><span>Royal Flush</span> <span>500:1</span></div>
+            <div class="pt-row"><span>Straight Flush</span> <span>50:1</span></div>
+            <div class="pt-row"><span>Four-of-a-Kind</span> <span>10:1</span></div>
+            <div class="pt-row"><span>Full House</span> <span>3:1</span></div>
+            <div class="pt-row"><span>Flush</span> <span>3:2</span></div>
+            <div class="pt-row"><span>Straight</span> <span>1:1</span></div>
         </div>
-
         <div class="paytable-card">
-            <h3>Triple Up Side Bet</h3>
-            <div class="pt-row"><span>Royal Flush</span> <span>50 to 1</span></div>
-            <div class="pt-row"><span>Straight Flush</span> <span>40 to 1</span></div>
-            <div class="pt-row"><span>Four-of-a-Kind</span> <span>30 to 1</span></div>
-            <div class="pt-row"><span>Full House</span> <span>8 to 1</span></div>
-            <div class="pt-row"><span>Flush</span> <span>7 to 1</span></div>
-            <div class="pt-row"><span>Straight</span> <span>4 to 1</span></div>
-            <div class="pt-row"><span>Three-of-a-Kind</span> <span>3 to 1</span></div>
+            <h3 style="color:var(--primary); margin:0 0 10px 0;">Triple Up Side</h3>
+            <div class="pt-row"><span>Royal Flush</span> <span>50:1</span></div>
+            <div class="pt-row"><span>Straight Flush</span> <span>40:1</span></div>
+            <div class="pt-row"><span>Four-of-a-Kind</span> <span>30:1</span></div>
+            <div class="pt-row"><span>Full House</span> <span>8:1</span></div>
+            <div class="pt-row"><span>Flush</span> <span>7:1</span></div>
+            <div class="pt-row"><span>Straight</span> <span>4:1</span></div>
+            <div class="pt-row"><span>3-of-a-Kind</span> <span>3:1</span></div>
         </div>
     </div>
 </div>
 
 <script>
-const rankMap = {14:'A', 13:'K', 12:'Q', 11:'J', 10:'10', 9:'9', 8:'8', 7:'7', 6:'6', 5:'5', 4:'4', 3:'3', 2:'2'};
-const suitMap = {'s':'♠', 'h':'♥', 'd':'♦', 'c':'♣'};
-const blindPayouts = {10:500, 9:50, 8:10, 7:3, 6:1.5, 5:1};
-const triplePayouts = {10:50, 9:40, 8:30, 7:8, 6:7, 5:4, 4:3};
+const rankValues = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
+const blindPT = {10:500, 9:50, 8:10, 7:3, 6:1.5, 5:1};
+const triplePT = {10:50, 9:40, 8:30, 7:8, 6:7, 5:4, 4:3};
 
-function init() {
-    document.querySelectorAll('.rank').forEach(sel => {
-        for (let val in rankMap) {
-            let opt = document.createElement('option');
-            opt.value = val; opt.innerText = rankMap[val];
-            sel.appendChild(opt);
-        }
-    });
-    document.querySelectorAll('.suit').forEach(sel => {
-        for (let val in suitMap) {
-            let opt = document.createElement('option');
-            opt.value = val; opt.innerText = suitMap[val];
-            sel.appendChild(opt);
-        }
-    });
+function parseCard(str) {
+    if (!str) return null;
+    str = str.trim().toUpperCase();
+    let suit = str.slice(-1).toLowerCase();
+    let rankStr = str.slice(0, -1);
+    let rank = rankValues[rankStr] || parseInt(rankStr);
+    if (!rank || !['s','h','d','c'].includes(suit)) return null;
+    return { r: rank, s: suit };
 }
-init();
 
 function evaluate(cards) {
     const r = cards.map(c => c.r).sort((a,b) => b-a);
@@ -139,49 +121,45 @@ function evaluate(cards) {
 }
 
 function solve() {
-    const p1 = {r: parseInt(document.getElementById('r1').value), s: document.getElementById('s1').value};
-    const p2 = {r: parseInt(document.getElementById('r2').value), s: document.getElementById('s2').value};
-    const board = [
-        {r: parseInt(document.getElementById('fr1').value), s: document.getElementById('fs1').value},
-        {r: parseInt(document.getElementById('fr2').value), s: document.getElementById('fs2').value},
-        {r: parseInt(document.getElementById('fr3').value), s: document.getElementById('fs3').value},
-        {r: parseInt(document.getElementById('tr').value), s: document.getElementById('ts').value},
-        {r: parseInt(document.getElementById('rr').value), s: document.getElementById('rs').value}
-    ];
+    const ids = ['p1','p2','f1','f2','f3','t','r'];
+    const cards = ids.map(id => parseCard(document.getElementById(id).value)).filter(c => c !== null);
+    if (cards.length < 7) { alert("Please enter all 7 cards (Hole + Board)"); return; }
 
+    const playerHole = [cards[0], cards[1]];
+    const board = [cards[2], cards[3], cards[4], cards[5], cards[6]];
     const deck = [];
-    for(let r in rankMap) for(let su in suitMap) deck.push({r:parseInt(r), s:su});
-    const known = [p1, p2, ...board];
-    const rem = deck.filter(c => !known.some(k => k.r===c.r && k.s===c.s));
+    for(let rv in rankValues) ['s','h','d','c'].forEach(s => deck.push({r:rankValues[rv], s}));
+    const rem = deck.filter(d => !cards.some(c => c.r === d.r && c.s === d.s));
 
-    const pRes = evaluate([...playerHole = [p1, p2], ...board]);
-    let totalEV = 0, count = 0;
+    const pRes = evaluate([...playerHole, ...board]);
+    let totalEV = 0, wins = 0, count = 0;
 
     for(let i=0; i<rem.length; i++) {
         for(let j=i+1; j<rem.length; j++) {
             count++;
             const dRes = evaluate([rem[i], rem[j], ...board]);
-            const dQual = dRes.score >= 2;
+            const dQual = dRes.score >= 2; // Pair or better qualifies
             let handEV = 0;
             if(pRes.score > dRes.score) {
-                handEV += 1 + (dQual ? 1 : 0) + (blindPayouts[pRes.score] || 0);
+                wins++;
+                handEV += 1 + (dQual ? 1 : 0) + (blindPT[pRes.score] || 0); //
             } else if(pRes.score < dRes.score) {
-                handEV -= 1 + 1 + (dQual ? 1 : 0);
+                handEV -= 1 + 1 + (dQual ? 1 : 0); // Loss settles play, blind, and ante (if qual)
             }
             totalEV += handEV;
         }
     }
 
     const mainEV = totalEV / count;
-    const tripleEV = triplePayouts[pRes.score] || -1;
-    
+    const tripleEV = triplePT[pRes.score] || -1; //
+
     document.getElementById('result-box').style.display = 'block';
-    document.getElementById('best-act').innerText = mainEV > -2.0 ? "BET 1x" : "FOLD";
+    document.getElementById('hand-desc').innerText = pRes.name;
     document.getElementById('ev-main').innerText = mainEV.toFixed(3);
     document.getElementById('ev-main').className = "ev-val " + (mainEV >= 0 ? "win" : "loss");
-    document.getElementById('ev-triple').innerText = tripleEV >= 0 ? "+" + tripleEV : "-1";
+    document.getElementById('ev-triple').innerText = (tripleEV >= 0 ? "+" + tripleEV : "-1");
     document.getElementById('ev-triple').className = "ev-val " + (tripleEV >= 0 ? "win" : "loss");
-    document.getElementById('hand-name').innerText = "Current Hand: " + pRes.name;
+    document.getElementById('win-rate').innerText = "Win Prob vs Hidden Dealer: " + ((wins/count)*100).toFixed(1) + "%";
 }
 </script>
 </body>
